@@ -32,7 +32,11 @@
 - (id)init {
     self = [super init];
     if (self) {
-        _automaticallyInflatesResponseImage = YES;
+        if ([[[UIDevice currentDevice] model] hasPrefix:@"iPod"]) {
+            _automaticallyInflatesResponseImage = NO;
+        } else {
+            _automaticallyInflatesResponseImage = YES;
+        }
         
         [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidReceiveMemoryWarningNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *__unused notification) {
             [self removeMemoryCache];
