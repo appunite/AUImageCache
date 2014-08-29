@@ -20,6 +20,8 @@ extern NSString *const AUImageErrorDomain;
 typedef void (^AUImageFetchSuccessHandler)(UIImage *image, NSString *url);
 typedef void (^AUImageFetchFailureHandler)(NSError *error);
 typedef UIImage *(^AUImageFetchProcessingHandler)(UIImage *image);
+typedef void (^AUImageFetchProgressHandler)(NSUInteger bytesRead, long long totalBytesRead, long long totalBytesExpectedToRead);
+
 
 @interface AUImageFetchController : NSObject {
     // key identifier, value operation
@@ -55,6 +57,13 @@ typedef UIImage *(^AUImageFetchProcessingHandler)(UIImage *image);
               imageProcessingBlock:(AUImageFetchProcessingHandler)imageProcessingBlock
                            success:(AUImageFetchSuccessHandler)success
                            failure:(AUImageFetchFailureHandler)failure;
+
+- (NSOperation *)fetchRemoteImageWithURL:(NSString *)url
+                              identifier:(NSString *)identifier
+                    imageProcessingBlock:(AUImageFetchProcessingHandler)imageProcessingBlock
+                   downloadProgressBlock:(AUImageFetchProgressHandler)progressHandler
+                                 success:(AUImageFetchSuccessHandler)success
+                                 failure:(AUImageFetchFailureHandler)failure;
 
 // return download request for URL
 - (NSURLRequest *)imageDownloadRequestForURL:(NSString *)url;

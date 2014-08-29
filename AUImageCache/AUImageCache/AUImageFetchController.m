@@ -198,6 +198,16 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
                     imageProcessingBlock:(AUImageFetchProcessingHandler)imageProcessingBlock
                                  success:(AUImageFetchSuccessHandler)success
                                  failure:(AUImageFetchFailureHandler)failure {
+    return [self fetchRemoteImageWithURL:url identifier:identifier imageProcessingBlock:imageProcessingBlock downloadProgressBlock:nil success:success failure:failure];
+
+}
+
+- (NSOperation *)fetchRemoteImageWithURL:(NSString *)url
+                              identifier:(NSString *)identifier
+                    imageProcessingBlock:(AUImageFetchProcessingHandler)imageProcessingBlock
+                   downloadProgressBlock:(AUImageFetchProgressHandler)progressHandler
+                                 success:(AUImageFetchSuccessHandler)success
+                                 failure:(AUImageFetchFailureHandler)failure {
     
     
     // create & get download request
@@ -229,6 +239,10 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
             failure(error);
         }
     }];
+    
+    if (progressHandler) {
+        [operation setDownloadProgressBlock:progressHandler];
+    }
     
     // return operation for later use (eg with queue)
     return operation;

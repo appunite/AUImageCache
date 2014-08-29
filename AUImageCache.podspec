@@ -1,11 +1,11 @@
 Pod::Spec.new do |spec|
   spec.name         = "AUImageCache"
-  spec.version      = "1.0"
+  spec.version      = "1.0.1"
   spec.summary      = "Cache fetching & loading library, supports disc and memory."
   spec.homepage     = "http://appunite.com/"
   spec.license      = 'Apache 2.0'
   spec.author       = { "emil.wojtaszek" => "emil@appunite.com", "natalia.osiecka" => "natalia.osa@appunite.com" }
-  spec.source       = { :git => 'https://review.appunite.com/AUImageCache.git', :commit => '87d9e7f'}
+  spec.source       = { :git => 'git@git.appunite.com:appunite/auimagecache.git', :commit => '87d9e7f'}
   spec.requires_arc = true
   spec.ios.deployment_target = '6.0'
   #spec.source      = { :git => "http://EXAMPLE/AUKit.git", :tag => "0.0.1" }
