@@ -10,7 +10,7 @@ Pod::Spec.new do |spec|
   spec.ios.deployment_target = '6.0'
   #spec.source      = { :git => "http://EXAMPLE/AUKit.git", :tag => "0.0.1" }
   
-  spec.frameworks   = ['Foundation', 'UIKit', 'MobileCoreServices', 'CommonCrypto', 'QuartzCore', 'ImageIO', 'CoreGraphics', 'Security', 'SystemConfiguration']
+  spec.frameworks   = ['Foundation', 'UIKit', 'MobileCoreServices', 'QuartzCore', 'ImageIO', 'CoreGraphics', 'Security', 'SystemConfiguration']
   
   spec.subspec 'Core' do |ss|
     ss.platform     = :ios
