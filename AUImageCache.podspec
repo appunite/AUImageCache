@@ -5,7 +5,7 @@ Pod::Spec.new do |spec|
   spec.homepage     = "http://appunite.com/"
   spec.license      = 'Apache 2.0'
   spec.author       = { "emil.wojtaszek" => "emil@appunite.com", "natalia.osiecka" => "natalia.osa@appunite.com" }
-  spec.source       = { :git => 'git@git.appunite.com:appunite/auimagecache.git', :commit => '5588274'}
+  spec.source       = { :git => 'https://github.com/appunite/AUImageCache.git', :commit => '5588274'}
   spec.requires_arc = true
   spec.ios.deployment_target = '6.0'
   #spec.source      = { :git => "http://EXAMPLE/AUKit.git", :tag => "0.0.1" }
