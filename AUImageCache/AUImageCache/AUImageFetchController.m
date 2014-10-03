@@ -21,31 +21,31 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
     dispatch_once(&pred, ^{
         __sharedManager = [[self alloc] init];
     });
-    
+
     return __sharedManager;
 }
 
 - (id)init {
     self = [super init];
     if (self) {
-        
+
         // set default image cache
         _imageCache = [AUImageCache sharedImageCache];
-        
+
         // create storage queue
         _storageQueue = [[NSOperationQueue alloc] init];
         _storageQueue.name = @"com.aukit.AUImageFetchController.storageQueue";
         _storageQueue.maxConcurrentOperationCount = 2;
-        
+
         // create download operation queue
         _downloadQueue = [[NSOperationQueue alloc] init];
         _downloadQueue.name = @"com.aukit.AUImageFetchController.downloadQueue";
         _downloadQueue.maxConcurrentOperationCount = 4;
-        
+
         // create dictionaries
         _operations = [[NSMutableDictionary alloc] init];
     }
-    
+
     return self;
 }
 
@@ -55,7 +55,7 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
 
 - (NSURLRequest *)imageDownloadRequestForURL:(NSString *)path {
     NSURL *url = [NSURL URLWithString:path];
-    
+
     return [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0f];
 }
 
@@ -77,26 +77,29 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
               imageProcessingBlock:(AUImageFetchProcessingHandler)imageProcessingBlock
                            success:(AUImageFetchSuccessHandler)success
                            failure:(AUImageFetchFailureHandler)failure {
-    
+
     // handle nil url
     if (!url) {
         NSDictionary *userInfo = @{NSLocalizedDescriptionKey: NSLocalizedString(@"Couldn't download image", nil),
                                    NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"Url doesn't exist", nil),
                                    NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Please contact with developer", nil)};
-        
+
         failure([NSError errorWithDomain:AUImageErrorDomain code:90 userInfo:userInfo]);
+
+        // we don't have to do nothing more here
+        return;
     }
-    
+
     // make sure to get string not url
     if ([url isKindOfClass:[NSURL class]]) {
         url = [(NSURL *)url absoluteString];
     }
-    
+
     NSOperation *operation = nil;
-    
+
     // get unique identifer
     NSString *identifier = [self imageIdentifierForURL:url];
-    
+
     // memory cache
     UIImage *image = [self imageFromMemoryCacheWithIdentifier:identifier];
     if (image) {
@@ -104,18 +107,18 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
         if (success) {
             success(image, url);
         }
-        
+
         return nil;
-        
+
     // disk cache
     } else if ([_imageCache isCacheForKey:identifier policy:AUCachePolicyDisk]) {
         // fetch image from disk cache
         operation = [self fetchDiskImageForUrl:url withIdentifier:identifier
                                        success:success failure:failure];
-        
+
         // add operation to queue
         [_storageQueue addOperation:operation];
-        
+
     // remote source
     } else {
         // fetch image from remote source
@@ -126,25 +129,25 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
         // add operation to queue
         [_downloadQueue addOperation:operation];
     }
-    
+
     // make sure there is no operation with such key
     if (operation && identifier.length > 0 && ![_operations objectForKey:identifier]) {
         // save operation object
         [_operations setObject:operation forKey:identifier];
-        
+
         // add observer for isFinished property
         [operation addObserver:self forKeyPath:@"isFinished" options:NSKeyValueObservingOptionNew context:(__bridge void *)(identifier)];
     } else {
         [operation cancel];
     }
-    
+
     return operation;
 }
 
 - (NSOperation *)fetchImageWithURL:(NSString *)url
                            success:(AUImageFetchSuccessHandler)success
                            failure:(AUImageFetchFailureHandler)failure {
-    
+
     return [self fetchImageWithURL:url imageProcessingBlock:nil success:success failure:failure];
 }
 
@@ -157,16 +160,16 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
 - (NSOperation *)fetchDiskImageForUrl:(NSString *)url withIdentifier:(NSString *)identifier
                               success:(AUImageFetchSuccessHandler)success
                               failure:(AUImageFetchFailureHandler)failure {
-    
+
     NSBlockOperation *operation = [[NSBlockOperation alloc] init];
     __weak NSBlockOperation *weakOperation = operation;
-    
+
     [operation addExecutionBlock:^{
         if (![weakOperation isCancelled]) {
-            
+
             // get image from disk cache
             UIImage *cachedImage = [_imageCache imageForKey:identifier cachePolicy:AUCachePolicyDisk cacheInMemory:NO];
-            
+
             if (cachedImage) {
                 // move to main queue
                 dispatch_async(dispatch_get_main_queue(), ^ {
@@ -188,7 +191,7 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
             }
         }
     }];
-    
+
     // return operation
     return operation;
 }
@@ -208,20 +211,20 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
                    downloadProgressBlock:(AUImageFetchProgressHandler)progressHandler
                                  success:(AUImageFetchSuccessHandler)success
                                  failure:(AUImageFetchFailureHandler)failure {
-    
-    
+
+
     // create & get download request
     NSURLRequest *request = [self imageDownloadRequestForURL:url];
-    
+
     // create operation
     AFHTTPRequestOperation *operation = [[AFHTTPRequestOperation alloc] initWithRequest:request];
     [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
-        
+
         // save data to disc cache
         [_storageQueue addOperationWithBlock:^{
             [_imageCache setData:responseObject forKey:identifier cachePolicy:AUCachePolicyAll];
         }];
-        
+
         // fire success block
         if (success) {
             dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
@@ -239,11 +242,11 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
             failure(error);
         }
     }];
-    
+
     if (progressHandler) {
         [operation setDownloadProgressBlock:progressHandler];
     }
-    
+
     // return operation for later use (eg with queue)
     return operation;
 }
@@ -255,14 +258,14 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
     if (!identifier || identifier.length == 0) {
         return;
     }
-    
+
     NSOperation *operation = [self operationWithIdentifier:identifier];
-    
+
     // cancel operation if not executing
     if (![operation isExecuting]) {
         [operation cancel];
     }
-    
+
     // remove operation from dict
     [_operations removeObjectForKey:identifier];
 }
@@ -270,7 +273,7 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
 - (void)cancelAllOperations {
     [_downloadQueue cancelAllOperations];
     [_storageQueue cancelAllOperations];
-    
+
     [_operations removeAllObjects];
 }
 
@@ -301,12 +304,12 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
     if ([keyPath isEqualToString:@"isFinished"] && [change[@"new"] isEqualToNumber:@(YES)]) {
         // get identifier from context
         id identifer = (__bridge id)context;
-        
+
         // remove operation from array base on operation identifier
         if (identifer && [identifer isKindOfClass:[NSString class]] && [(NSString *)identifer length] > 0) {
             [_operations removeObjectForKey:identifer];
         }
-        
+
         // remove object observer
         [object removeObserver:self forKeyPath:@"isFinished"];
     }
