@@ -87,7 +87,7 @@ NSString *const AUImageErrorDomain = @"com.appunite.AppUnite.ImageErrorDomain";
         failure([NSError errorWithDomain:AUImageErrorDomain code:90 userInfo:userInfo]);
 
         // we don't have to do nothing more here
-        return;
+        return nil;
     }
 
     // make sure to get string not url
