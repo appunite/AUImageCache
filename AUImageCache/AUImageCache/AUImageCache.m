@@ -15,7 +15,7 @@
 //Frameworks
 #import <MobileCoreServices/MobileCoreServices.h>
 #import <uiimage-from-animated-gif/UIImage+animatedGIF.h>
-#import "WebP/decode.h"
+#import "decode.h"
 
 @implementation AUImageCache
 

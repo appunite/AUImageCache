@@ -10,7 +10,7 @@
 #import <UIKit/UIKit.h>
 
 //Frameworks
-#import "WebP/decode.h"
+#import "decode.h"
 
 typedef NS_ENUM(NSUInteger, AUImageContentType) {
     AUImageContentTypeOther = 0,
